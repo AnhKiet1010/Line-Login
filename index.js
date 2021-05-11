@@ -28,19 +28,18 @@ app.set('views', './views');
 app.get('/',async (req, res) => {
     
     if (req.cookies.access_token) {
-
-        await fs.readFile('data.json', (err, data) => {
-            if (err) throw err;
-            let user = JSON.parse(data);
-            if(user.userId === req.cookies.id) {
-                res.render('index', {
-                    name: user.displayName,
-                    picture: user.pictureUrl,
-                    email: user.email
-                });
-                return;
-            }
-        });
+        const user = await User.findOne({_id: req.cookies.id}).exec();
+        
+        if(!user) {
+            res.redirect('/login');
+        } else {
+            res.render('index', {
+                name: user.name,
+                picture: user.avatar,
+                email: user.email,
+                statusMessage: user.statusMessage
+            });
+        }
     } else {
         res.redirect('/login');
     }
@@ -93,7 +92,11 @@ app.get('/callback', async (req, res) => {
     const { userId, displayName, pictureUrl, statusMessage } = userInfo.data;
 
     const user = new User({
-        userId, displayName, pictureUrl, statusMessage, email: userInfo1.data.email
+        lineId: userId,
+        name: displayName,
+        avatar: pictureUrl,
+        statusMessage,
+        email: userInfo1.data.email
     });
 
     await user.save(err => {
