@@ -19,6 +19,7 @@
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "mongoose": "^5.12.8",
+    "nodemailer": "^6.6.0",
     "qs": "^6.10.1"
   },
   "devDependencies": {
