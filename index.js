@@ -116,7 +116,7 @@ app.get('/callback', async (req, res) => {
 });
 
 app.get("/logout", async (req,res) => {
-    await axios({
+    const result = await axios({
         method: "POST",
         url: "https://api.line.me/oauth2/v2.1/revoke",
         headers: {
@@ -128,6 +128,8 @@ app.get("/logout", async (req,res) => {
             'access_token': req.cookies.access_token
         })
     });
+
+    console.log("result", result);
 
     res.clearCookie('access_token');
     res.clearCookie('id');
