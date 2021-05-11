@@ -111,6 +111,13 @@ app.get('/callback', async (req, res) => {
                 res.send("Error save User");
             }
         });
+    } else {
+        await User.findOneAndUpdate({lineId: userId}, {
+            name: displayName,
+            avatar: pictureUrl,
+            statusMessage,
+            email: userInfo1.data.email
+        }).exec();
     }
     res
         .status(201)
