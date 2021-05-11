@@ -7,6 +7,7 @@ const axios = require('axios');
 const qs = require('qs');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
+const port = process.env.PORT || 3000;
 
 /* Set up static file */
 app.use(express.static('public'));
@@ -123,5 +124,5 @@ app.get("/logout", async (req,res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${process.env.PORT || 3000}`)
+    console.log(`Example app listening at http://localhost:${port}`)
 })
