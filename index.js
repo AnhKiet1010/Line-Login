@@ -18,13 +18,12 @@ async function main(mail) {
   
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        pool: true,
-      host: "sv3.tmail.vn",
+      host: "smtp.ethereal.email",
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: "info@ameritecjsc.com", // generated ethereal user
-        pass: "V32v3mtG9&", // generated ethereal password
+        user: testAccount.user, // generated ethereal user
+        pass: testAccount.pass, // generated ethereal password
       },
     });
   
