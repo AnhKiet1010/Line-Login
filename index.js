@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
-const port = 3000;
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const qs = require('qs');
@@ -124,5 +123,5 @@ app.get("/logout", async (req,res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Example app listening at http://localhost:${process.env.PORT || 3000}`)
 })
