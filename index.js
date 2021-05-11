@@ -28,7 +28,7 @@ app.set('views', './views');
 app.get('/',async (req, res) => {
     
     if (req.cookies.access_token) {
-        const user = await User.findOne({_id: req.cookies.id}).exec();
+        const user = await User.findOne({lineId: req.cookies.id}).exec();
         
         if(!user) {
             res.redirect('/login');
