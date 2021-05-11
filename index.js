@@ -46,9 +46,13 @@ app.get('/',async (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-    res.render('login', {
-        uri: process.env.REDIRECT_URI
-    });
+    if(req.cookies.access_token) {
+        res.redirect('/');
+    } else {
+        res.render('login', {
+            uri: process.env.REDIRECT_URI
+        });
+    }
 });
 
 app.get('/callback', async (req, res) => {
@@ -91,49 +95,50 @@ app.get('/callback', async (req, res) => {
 
     const { userId, displayName, pictureUrl, statusMessage } = userInfo.data;
 
-    const user = new User({
-        lineId: userId,
-        name: displayName,
-        avatar: pictureUrl,
-        statusMessage,
-        email: userInfo1.data.email
-    });
+    const savedUser = await User.findOne({lineId: userId}).exec();
 
-    await user.save(err => {
-        if(err) {
-            res.send("Error save User");
-        } else {
-            res
-                .status(201)
-                .cookie('access_token', result.data.access_token, {
-                    expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
-                })
-                .cookie('id', userInfo.data.userId)
-                .redirect('/');
-        }
-    });
- 
+    if(!savedUser) {
+        const user = new User({
+            lineId: userId,
+            name: displayName,
+            avatar: pictureUrl,
+            statusMessage,
+            email: userInfo1.data.email
+        });
+    
+        await user.save(err => {
+            if(err) {
+                res.send("Error save User");
+            }
+        });
+    }
+    res
+        .status(201)
+        .cookie('access_token', result.data.access_token, {
+            expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+        })
+        .cookie('id', userInfo.data.userId)
+        .redirect('/');
 });
 
 app.get("/logout", async (req,res) => {
-    const result = await axios({
-        method: "POST",
-        url: "https://api.line.me/oauth2/v2.1/revoke",
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-        },
-        data: qs.stringify({
-            'client_id': process.env.CLIENT_ID,
-            'client_secret': process.env.CLIENT_SECRET,
-            'access_token': req.cookies.access_token
-        })
-    });
-
-    console.log("result", result);
-
-    res.clearCookie('access_token');
-    res.clearCookie('id');
-    res.redirect("/");
+    if(req.cookies.access_token) {
+        await axios({
+            method: "POST",
+            url: "https://api.line.me/oauth2/v2.1/revoke",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+            },
+            data: qs.stringify({
+                'client_id': process.env.CLIENT_ID,
+                'client_secret': process.env.CLIENT_SECRET,
+                'access_token': req.cookies.access_token
+            })
+        });
+        res.clearCookie('access_token');
+        res.clearCookie('id');
+    }
+    res.redirect("/login");
 })
 
 app.listen(port, () => {
