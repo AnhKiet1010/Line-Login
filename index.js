@@ -67,6 +67,8 @@ app.get('/callback', async (req, res) => {
         })
     });
 
+    console.log("result", result);
+
     const userInfo1 = await axios({
         method: "POST",
         url: "https://api.line.me/oauth2/v2.1/verify",
@@ -79,6 +81,8 @@ app.get('/callback', async (req, res) => {
         })
     });
 
+    console.log("userInfo1", userInfo1);
+
 
     const userInfo = await axios({
         method: "GET",
@@ -88,6 +92,8 @@ app.get('/callback', async (req, res) => {
             'Authorization': `Bearer ${result.data.access_token}`
         }
     });
+
+    console.log("userInfo", userInfo);
 
     const { userId, displayName, pictureUrl, statusMessage } = userInfo.data;
 
