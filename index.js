@@ -7,7 +7,8 @@ const axios = require('axios');
 const qs = require('qs');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
+const User = require('./models/user.model');
 
 /* Set up static file */
 app.use(express.static('public'));
@@ -15,6 +16,10 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const connectDB = require("./db");
+// Connect to database
+connectDB();
 
 /* Set up view pug */
 app.set('view engine', 'ejs');
@@ -87,21 +92,24 @@ app.get('/callback', async (req, res) => {
 
     const { userId, displayName, pictureUrl, statusMessage } = userInfo.data;
 
-    const user = {
+    const user = new User({
         userId, displayName, pictureUrl, statusMessage, email: userInfo1.data.email
-    }
+    });
 
-    let data = JSON.stringify(user);
-
-    await fs.writeFileSync('data.json', data);
-
-    res
-        .status(201)
-        .cookie('access_token', result.data.access_token, {
-            expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
-        })
-        .cookie('id', userInfo.data.userId)
-        .redirect('/');
+    await user.save(err => {
+        if(err) {
+            res.send("Error save User");
+        } else {
+            res
+                .status(201)
+                .cookie('access_token', result.data.access_token, {
+                    expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+                })
+                .cookie('id', userInfo.data.userId)
+                .redirect('/');
+        }
+    });
+ 
 });
 
 app.get("/logout", async (req,res) => {
